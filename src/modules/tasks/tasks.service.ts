@@ -17,18 +17,25 @@ export class TasksService {
   }): Promise<TaskResponseDto[]> {
     const { from, to, search } = params;
 
+    const where: any = {};
+
+    if (from || to) {
+      where.day = {};
+      if (from) where.day.gte = from;
+      if (to) where.day.lte = to;
+    }
+
+    if (search) {
+      where.title = { contains: search, mode: 'insensitive' };
+    }
+
     const tasks = await this.prisma.task.findMany({
-      where: {
-        day: from && to ? { gte: from, lte: to } : undefined,
-
-        title: search ? { contains: search, mode: 'insensitive' } : undefined,
-      },
-
+      where,
       orderBy: [{ day: 'asc' }, { order: 'asc' }],
     });
+
     return tasks.map(TaskMapper.toResponse);
   }
-
   async create(dto: CreateTaskRequestDto): Promise<TaskResponseDto> {
     const lastTask = await this.prisma.task.findFirst({
       where: { day: dto.day },
