@@ -18,4 +18,5 @@ model Task {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([day])
+  @@map("task")
 }
